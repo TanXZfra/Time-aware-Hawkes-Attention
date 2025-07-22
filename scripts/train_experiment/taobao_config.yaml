@@ -3,9 +3,9 @@ pipeline_config_id: runner_config
 data:
   taobao:
     data_format: json
-    train_dir: easytpp/taobao
-    valid_dir: easytpp/taobao
-    test_dir: easytpp/taobao
+    train_dir: data/data_taobao/train.json
+    valid_dir: data/data_taobao/valid.json
+    test_dir: data/data_taobao/test.json
     data_specs:
       num_event_types: 17
       pad_token_id: 17
@@ -35,16 +35,16 @@ HawkesTHP_train:
     gpu: 0
     l2_coef: 0.1
   model_config:
-    hidden_size: 64
+    hidden_size: 256
     time_emb_size: 4
     num_layers: 2
     num_heads: 2
     phi_width: 8
     phi_depth: 2
-    d_k: 16
-    d_v: 16
-    d_model: 16
-    d_rnn: 16
+    d_k: 64
+    d_v: 64
+    d_model: 64
+    d_rnn: 64
     rnn: True
     mc_num_sample_per_step: 20
     loss_integral_num_sample_per_step: 20
@@ -74,16 +74,16 @@ HawkesTHP_gen:
     batch_size: 64
     max_epoch: 1
   model_config:
-    hidden_size: 64
+    hidden_size: 256
     time_emb_size: 4
     num_layers: 2
     num_heads: 2
     phi_width: 8
     phi_depth: 2
-    d_k: 16
-    d_v: 16
-    d_model: 16
-    d_rnn: 16
+    d_k: 64
+    d_v: 64
+    d_model: 64
+    d_rnn: 64
     rnn: True
     mc_num_sample_per_step: 20
     loss_integral_num_sample_per_step: 20

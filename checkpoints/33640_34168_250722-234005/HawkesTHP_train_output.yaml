@@ -1,0 +1,72 @@
+data_config:
+  train_dir: data/data_amazon/train.json
+  valid_dir: data/data_amazon/valid.json
+  test_dir: data/data_amazon/test.json
+  data_format: json
+  data_specs:
+    num_event_types: 16
+    pad_token_id: 16
+    padding_side: right
+    truncation_side: right
+    padding_strategy: null
+    truncation_strategy: null
+    max_len: null
+base_config:
+  stage: train
+  backend: torch
+  dataset_id: amazon
+  runner_id: std_tpp
+  model_id: HawkesTHP
+  base_dir: ./checkpoints/
+  specs:
+    log_folder: ./checkpoints/33640_34168_250722-234005
+    saved_model_dir: ./checkpoints/33640_34168_250722-234005\models\saved_model
+    saved_log_dir: ./checkpoints/33640_34168_250722-234005\log
+    output_config_dir: ./checkpoints/33640_34168_250722-234005\HawkesTHP_train_output.yaml
+model_config:
+  rnn_type: LSTM
+  hidden_size: 64
+  time_emb_size: 4
+  num_layers: 2
+  sharing_param_layer: false
+  loss_integral_num_sample_per_step: 20
+  dropout_rate: 0.1
+  use_ln: true
+  thinning:
+    num_seq: 10
+    num_sample: 1
+    num_exp: 500
+    look_ahead_time: 10
+    patience_counter: 5
+    over_sample_rate: 5
+    num_samples_boundary: 5
+    dtime_max: 5
+    num_step_gen: 1
+  num_event_types_pad: 17
+  num_event_types: 16
+  event_pad_index: 16
+  model_id: HawkesTHP
+  pretrained_model_dir: null
+  gpu: 0
+  model_specs: {}
+  d_model: 16
+  d_k: 16
+  d_v: 16
+  phi_width: 8
+  phi_depth: 2
+  rnn: true
+  d_rnn: 16
+trainer_config:
+  seed: 2025
+  gpu: 0
+  batch_size: 64
+  max_epoch: 500
+  shuffle: false
+  optimizer: adam
+  learning_rate: 0.001
+  valid_freq: 1
+  use_tfb: false
+  metrics:
+  - acc
+  - rmse
+  l2_coef: 0.1

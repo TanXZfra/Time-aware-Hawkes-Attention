@@ -3,9 +3,9 @@ pipeline_config_id: runner_config
 data:
   amazon:
     data_format: json
-    train_dir: easytpp/amazon
-    valid_dir: easytpp/amazon
-    test_dir: easytpp/amazon
+    train_dir: data/data_amazon/train.json
+    valid_dir: data/data_amazon/valid.json
+    test_dir: data/data_amazon/test.json
     data_specs:
       num_event_types: 16
       pad_token_id: 16
@@ -32,19 +32,19 @@ HawkesTHP_train:
     use_tfb: False
     metrics: [ 'acc', 'rmse' ]
     seed: 2025
-    gpu: 0
+    gpu: -1
     l2_coef: 0.1
   model_config:
-    hidden_size: 64
+    hidden_size: 256
     time_emb_size: 4
     num_layers: 2
     num_heads: 2
     phi_width: 8
     phi_depth: 2
-    d_k: 16
-    d_v: 16
-    d_model: 16
-    d_rnn: 16
+    d_k: 64
+    d_v: 64
+    d_model: 64
+    d_rnn: 64
     rnn: True
     mc_num_sample_per_step: 20
     loss_integral_num_sample_per_step: 20
@@ -74,16 +74,16 @@ HawkesTHP_gen:
     batch_size: 64
     max_epoch: 1
   model_config:
-    hidden_size: 64
+    hidden_size: 256
     time_emb_size: 4
     num_layers: 2
     num_heads: 2
     phi_width: 8
     phi_depth: 2
-    d_k: 16
-    d_v: 16
-    d_model: 16
-    d_rnn: 16
+    d_k: 64
+    d_v: 64
+    d_model: 64
+    d_rnn: 64
     rnn: True
     mc_num_sample_per_step: 20
     loss_integral_num_sample_per_step: 20

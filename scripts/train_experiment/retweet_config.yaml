@@ -3,9 +3,9 @@ pipeline_config_id: runner_config
 data:
   retweet:
     data_format: json
-    train_dir: easytpp/retweet
-    valid_dir: easytpp/retweet
-    test_dir: easytpp/retweet
+    train_dir: data/data_retweet/train.json
+    valid_dir: data/data_retweet/valid.json
+    test_dir: data/data_retweet/test.json
     data_specs:
       num_event_types: 3
       pad_token_id: 3
@@ -24,7 +24,7 @@ HawkesTHP_train:
     base_dir: './checkpoints/'
   trainer_config:
     batch_size: 64
-    max_epoch: 100
+    max_epoch: 500
     shuffle: False
     optimizer: adam
     learning_rate: 1.e-3
@@ -32,26 +32,26 @@ HawkesTHP_train:
     use_tfb: False
     metrics: [ 'acc', 'rmse' ]
     seed: 2025
-    gpu: 0
+    gpu: -1
     l2_coef: 0.1
   model_config:
-    hidden_size: 8
+    hidden_size: 256
     time_emb_size: 4
-    num_layers: 1
-    num_heads: 1
+    num_layers: 2
+    num_heads: 2
     phi_width: 8
     phi_depth: 2
-    d_k: 3
-    d_v: 3
-    d_model: 3
-    d_rnn: 3
+    d_k: 64
+    d_v: 64
+    d_model: 64
+    d_rnn: 64
     rnn: True
-    mc_num_sample_per_step: 1000
-    loss_integral_num_sample_per_step: 1000
+    mc_num_sample_per_step: 20
+    loss_integral_num_sample_per_step: 20
     use_ln: False
     thinning:
       num_seq: 10
-      num_sample: 1000
+      num_sample: 1
       num_exp: 500 # number of i.i.d. Exp(intensity_bound) draws at one time in thinning algorithm
       look_ahead_time: 10
       patience_counter: 5 # the maximum iteration used in adaptive thinning
@@ -73,19 +73,19 @@ HawkesTHP_gen:
     batch_size: 64
     max_epoch: 1
   model_config:
-    hidden_size: 8
+    hidden_size: 256
     time_emb_size: 4
-    num_layers: 1
-    num_heads: 1
+    num_layers: 2
+    num_heads: 2
     phi_width: 8
     phi_depth: 2
-    d_k: 3
-    d_v: 3
-    d_model: 3
-    d_rnn: 3
+    d_k: 64
+    d_v: 64
+    d_model: 64
+    d_rnn: 64
     rnn: True
-    mc_num_sample_per_step: 1000
-    loss_integral_num_sample_per_step: 1000
+    mc_num_sample_per_step: 20
+    loss_integral_num_sample_per_step: 20
     use_ln: False
 #    pretrained_model_dir: ./checkpoints/2694_4384867712_230603-160544/models/saved_model
     thinning:
@@ -117,7 +117,7 @@ THP_train:
     use_tfb: False
     metrics: [ 'acc', 'rmse' ]
     seed: 2025
-    gpu: 0
+    gpu: -1
   model_config:
     hidden_size: 64
     time_emb_size: 16

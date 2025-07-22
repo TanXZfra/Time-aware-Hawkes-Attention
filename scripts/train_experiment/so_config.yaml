@@ -3,9 +3,9 @@ pipeline_config_id: runner_config
 data:
   stackoverflow:
     data_format: json
-    train_dir: easytpp/stackoverflow
-    valid_dir: easytpp/stackoverflow
-    test_dir: easytpp/stackoverflow
+    train_dir: data/data_stackoverflow/train.json
+    valid_dir: data/data_stackoverflow/valid.json
+    test_dir: data/data_stackoverflow/test.json
     data_specs:
       num_event_types: 22
       pad_token_id: 22
@@ -32,7 +32,7 @@ HawkesTHP_train:
     use_tfb: False
     metrics: [ 'acc', 'rmse' ]
     seed: 2025
-    gpu: 0
+    gpu: -1
     l2_coef: 0.1
   model_config:
     hidden_size: 64

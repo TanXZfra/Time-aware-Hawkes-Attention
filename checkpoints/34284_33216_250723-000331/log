@@ -1,0 +1,8 @@
+2025-07-23 00:03:31,838 - base_runner.py[pid:34284;line:176:save_log] - INFO: Save the log to ./checkpoints/34284_33216_250723-000331\log
+2025-07-23 00:03:40,672 - tpp_runner.py[pid:34284;line:60:_init_model] - INFO: Num of model parameters 46064
+2025-07-23 00:03:42,443 - base_runner.py[pid:34284;line:98:train] - INFO: Data 'stackoverflow' loaded...
+2025-07-23 00:03:42,449 - base_runner.py[pid:34284;line:103:train] - INFO: Start HawkesTHP training...
+2025-07-23 00:06:56,874 - tpp_runner.py[pid:34284;line:96:_train_model] - INFO: [ Epoch 0 (train) ]: train loglike is -13.069256011423072, num_events is 89096
+2025-07-23 00:08:22,786 - tpp_runner.py[pid:34284;line:107:_train_model] - INFO: [ Epoch 0 (valid) ]:  valid loglike is -9.547462454654784, num_events is 25361, acc is 0.0024446985528961793, rmse is 1.3490316486776814
+2025-07-23 00:09:47,419 - tpp_runner.py[pid:34284;line:122:_train_model] - INFO: [ Epoch 0 (test) ]: test loglike is -9.220504536975437, num_events is 26117, acc is 0.0032928743730137456, rmse is 1.3142295543369564
+2025-07-23 00:09:47,423 - tpp_runner.py[pid:34284;line:124:_train_model] - CRITICAL: current best loglike on valid set is -9.5475 (updated at epoch-0), best updated at this epoch

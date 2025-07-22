@@ -3,9 +3,9 @@ pipeline_config_id: runner_config
 data:
   taxi:
     data_format: json
-    train_dir: easytpp/taxi
-    valid_dir: easytpp/taxi
-    test_dir: easytpp/taxi
+    train_dir: data/data_taxi/train.json
+    valid_dir: data/data_taxi/valid.json
+    test_dir: data/data_taxi/test.json
     data_specs:
       num_event_types: 10
       pad_token_id: 10
