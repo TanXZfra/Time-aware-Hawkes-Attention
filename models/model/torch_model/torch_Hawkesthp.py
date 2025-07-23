@@ -92,7 +92,7 @@ class HawkesTHP(TorchBaseModel):
             dropout=self.dropout
         )
         self.rnn = RNN_layers(self.d_model, self.d_rnn)
-        print(f"d_inner",{self.d_inner},"d_model",{self.d_model},"n_layers",{self.n_layers},"n_head",{self.n_head},"d_k",{self.d_k},"d_v",{self.d_v},"phi_width",{self.phi_width},"phi_depth",{self.phi_depth})
+        print(f"d_inner",{self.d_inner},"d_model",{self.d_model},"n_layers",{self.n_layers},"n_head",{self.n_head},"d_k",{self.d_k},"d_v",{self.d_v},"phi_width",{self.phi_width},"phi_depth",{self.phi_depth},"rnn",{self.rnn_ornot})
 
     def forward(self, time_seqs, type_seqs, attention_mask):
         """Call the model
