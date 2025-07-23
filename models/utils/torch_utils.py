@@ -71,8 +71,12 @@ def set_optimizer(optimizer, params, lr, trainer_config):
         {'params': other_params, 'weight_decay': 0.0},
     ]
 
+    print(f"[Optimizer] batch_size: {trainer_config.batch_size}")
+    print(f"[Optimizer] learning rate: {lr}")
+    print(f"[Optimizer] phi_l2_coef: {phi_decay}")
     print(f"[Optimizer] phi_params total elements: {sum(p.numel() for p in phi_params)}")
     print(f"[Optimizer] other_params total elements: {sum(p.numel() for p in other_params)}")
+
 
     if isinstance(optimizer, str):
         if optimizer.lower() == "adam":
