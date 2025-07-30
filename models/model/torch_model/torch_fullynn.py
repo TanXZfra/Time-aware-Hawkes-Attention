@@ -3,7 +3,7 @@ from torch import nn
 from torch.nn import functional as F
 from torch.autograd import grad
 
-from easy_tpp.model.torch_model.torch_basemodel import TorchBaseModel
+from models.model.torch_model.torch_basemodel import TorchBaseModel
 
 
 class CumulHazardFunctionNetwork(nn.Module):
