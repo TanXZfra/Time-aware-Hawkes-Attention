@@ -1,9 +1,9 @@
 import torch
 from torch import nn
 
-from easy_tpp.model.torch_model.torch_baselayer import DNN
-from easy_tpp.model.torch_model.torch_basemodel import TorchBaseModel
-from easy_tpp.utils import rk4_step_method
+from models.model.torch_model.torch_baselayer import DNN
+from models.model.torch_model.torch_basemodel import TorchBaseModel
+from models.utils import rk4_step_method
 
 
 def flatten_parameters(model):
