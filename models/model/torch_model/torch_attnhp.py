@@ -3,8 +3,8 @@ import math
 import torch
 from torch import nn
 
-from easy_tpp.model.torch_model.torch_baselayer import EncoderLayer, MultiHeadAttention, ScaledSoftplus
-from easy_tpp.model.torch_model.torch_basemodel import TorchBaseModel
+from models.model.torch_model.torch_baselayer import EncoderLayer, MultiHeadAttention, ScaledSoftplus
+from models.model.torch_model.torch_basemodel import TorchBaseModel
 
 
 class AttNHP(TorchBaseModel):
