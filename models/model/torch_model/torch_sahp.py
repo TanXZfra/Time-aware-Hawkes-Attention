@@ -1,9 +1,9 @@
 import torch
 import torch.nn as nn
 
-from easy_tpp.model.torch_model.torch_baselayer import EncoderLayer, MultiHeadAttention, \
+from models.model.torch_model.torch_baselayer import EncoderLayer, MultiHeadAttention, \
     TimeShiftedPositionalEncoding, ScaledSoftplus
-from easy_tpp.model.torch_model.torch_basemodel import TorchBaseModel
+from models.model.torch_model.torch_basemodel import TorchBaseModel
 
 
 class SAHP(TorchBaseModel):
