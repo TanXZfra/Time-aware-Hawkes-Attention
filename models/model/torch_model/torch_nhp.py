@@ -1,8 +1,8 @@
 import torch
 from torch import nn
 
-from easy_tpp.model.torch_model.torch_basemodel import TorchBaseModel
-from easy_tpp.model.torch_model.torch_baselayer import ScaledSoftplus
+from models.model.torch_model.torch_basemodel import TorchBaseModel
+from models.model.torch_model.torch_baselayer import ScaledSoftplus
 
 
 class ContTimeLSTMCell(nn.Module):
