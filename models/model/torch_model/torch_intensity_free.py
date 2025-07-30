@@ -5,7 +5,7 @@ from torch.distributions import Categorical, TransformedDistribution
 from torch.distributions import MixtureSameFamily as TorchMixtureSameFamily
 from torch.distributions import Normal as TorchNormal
 
-from easy_tpp.model.torch_model.torch_basemodel import TorchBaseModel
+from models.model.torch_model.torch_basemodel import TorchBaseModel
 
 
 def clamp_preserve_gradients(x, min_val, max_val):
