@@ -1,3 +1,5 @@
+*.csv filter=lfs diff=lfs merge=lfs -text
+*.pkl filter=lfs diff=lfs merge=lfs -text
 time_series/dataset/electricity.csv filter=lfs diff=lfs merge=lfs -text
 data/data_meme/train.pkl filter=lfs diff=lfs merge=lfs -text
 time_series/dataset/traffic.csv filter=lfs diff=lfs merge=lfs -text
