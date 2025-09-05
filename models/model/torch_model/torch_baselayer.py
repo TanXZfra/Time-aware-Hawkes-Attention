@@ -263,6 +263,114 @@ class HawkesAttention4(nn.Module):
 
         return out
 
+class HawkesAttentionShared(nn.Module):
+    """
+    A modified version of HawkesAttention4 where all event types share a single MLP phi.
+    """
+    def __init__(self, num_types, n_head, d_model, d_k, d_v,
+                 phi_width, phi_depth, dropout=0.1, normalize_before=True):
+        super().__init__()
+        self.n_head = n_head
+        self.d_model = d_model
+        self.d_k = d_k
+        self.d_v = d_v
+        self.scale = math.sqrt(d_k) # or d_k**0.0.5
+        self.normalize_before = normalize_before
+        self.dropout = nn.Dropout(dropout)
+        self.num_types = num_types
+
+        self.w_qs = nn.Linear(d_model, n_head * d_k, bias=False)
+        self.w_ks = nn.Linear(d_model, n_head * d_k, bias=False)
+        self.w_vs = nn.Linear(d_model, n_head * d_v, bias=False)
+        nn.init.xavier_uniform_(self.w_qs.weight)
+        nn.init.xavier_uniform_(self.w_ks.weight)
+        nn.init.xavier_uniform_(self.w_vs.weight)
+
+        self.fc = nn.Linear(n_head * d_v, d_model, bias=False)
+        nn.init.xavier_uniform_(self.fc.weight)
+
+        self.layer_norm = nn.LayerNorm(d_model, eps=1e-6)
+
+        def build_phi():
+            layers = []
+            dim = 1 
+            for _ in range(phi_depth):
+                linear = nn.Linear(dim, phi_width)
+                nn.init.xavier_uniform_(linear.weight) 
+                layers += [linear, nn.GELU(), nn.Dropout(dropout)]
+                dim = phi_width
+
+            final_linear = nn.Linear(dim, 1)
+            nn.init.xavier_uniform_(final_linear.weight)
+            layers.append(final_linear)
+
+            return nn.Sequential(*layers)
+
+        # Define a single shared phi network
+        self.shared_phi = nn.ModuleList([build_phi() for _ in range(n_head)])
+
+    def forward(self, q, k, v, t_in, c, mask=None):
+        B, L, _ = q.size()
+        H = self.n_head
+        residual = q
+        if self.normalize_before:
+            q = self.layer_norm(q)
+
+        qh = self.w_qs(q).view(B, L, H, self.d_k).transpose(1, 2)  # (B, H, L, d_k)
+        kh = self.w_ks(k).view(B, L, H, self.d_k).transpose(1, 2)
+        vh = self.w_vs(v).view(B, L, H, self.d_v).transpose(1, 2)
+
+        t_query = t_in.unsqueeze(2)
+        t_key = t_in.unsqueeze(1)
+        delta = t_query - t_key
+
+        # Padding mask (B, L)
+        padding_mask = (c == self.num_types)
+        valid_mask = (~padding_mask.unsqueeze(2)) & (~padding_mask.unsqueeze(1))
+
+        phiQ = torch.zeros(B, H, L, L, device=q.device)
+        phiK = torch.zeros(B, H, L, L, device=q.device)
+
+        for h in range(self.n_head):
+            phi_net = self.shared_phi[h]
+
+            delta_i = delta.unsqueeze(-1)
+            phi_i = phi_net(delta_i).squeeze(-1)
+
+            # Apply valid_mask to exclude padding
+            phiQ_h = torch.zeros(B, L, L, device=q.device)
+            phiQ_h[valid_mask] = phi_i[valid_mask]
+            phiQ[:, h] = phiQ_h
+
+            phiK_h = torch.zeros(B, L, L, device=q.device)
+            phiK_h[valid_mask] = phi_i[valid_mask]
+            phiK[:, h] = phiK_h
+
+        q_mod = qh.unsqueeze(3) * phiQ.unsqueeze(-1)        # (B, H, L, L, d_k)
+        k_mod = kh.unsqueeze(2) * phiK.unsqueeze(-1)        # (B, H, L, L, d_k)
+        v_mod = vh.unsqueeze(2) * phiK.unsqueeze(-1)        # (B, H, L, L, d_v)
+
+        scores = (q_mod * k_mod).sum(-1) / self.scale  # (B, H, L, L)
+
+        if mask is not None:
+            mask = mask.unsqueeze(1)
+            scores = scores.masked_fill(mask, float('-inf'))
+
+        attn = F.softmax(scores, dim=-1)
+        attn = self.dropout(attn)
+
+        out_heads = torch.einsum('b h i j, b h i j d -> b h i d', attn, v_mod)
+
+        out = out_heads.transpose(1, 2).contiguous().view(B, L, -1)  # (B, L, H * d_v)
+        out = self.dropout(self.fc(out))                            # (B, L, d_model)
+        out = out + residual
+
+        return out
+
+
+
+
+
 
 class SublayerConnection(nn.Module):
     # used for residual connection
