@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import math
-from models.model.torch_model.torch_baselayer import  MultiHeadAttention, HawkesAttention4, TimePositionalEncoding, ScaledSoftplus, EncoderLayer
+from models.model.torch_model.torch_baselayer import  MultiHeadAttention, HawkesAttention4, TimePositionalEncoding, ScaledSoftplus
 from models.model.torch_model.torch_basemodel import TorchBaseModel
 
 
@@ -306,28 +306,12 @@ class Encoder(nn.Module):
         self.d_model = d_model
         self.pad = opt.pad_token_id
 
-        # position vector, used for temporal encoding
-        self.position_vec = torch.tensor(
-            [math.pow(10000.0, 2.0 * (i // 2) / d_model) for i in range(d_model)],
-            device=torch.device('cpu'))
-
         # event type embedding
         self.event_emb = nn.Embedding(num_types + 1, d_model, padding_idx=self.pad)
 
         self.layer_stack = nn.ModuleList([
             EncoderLayer(opt,d_model, d_inner, n_head, d_k, d_v,num_types,phi_width,phi_depth, dropout=dropout, normalize_before=False)
             for _ in range(n_layers)])
-
-    def temporal_enc(self, time, non_pad_mask):
-        """
-        Input: batch*seq_len.
-        Output: batch*seq_len*d_model.
-        """
-
-        result = time.unsqueeze(-1) / self.position_vec
-        result[:, :, 0::2] = torch.sin(result[:, :, 0::2])
-        result[:, :, 1::2] = torch.cos(result[:, :, 1::2])
-        return result * non_pad_mask
 
     def forward(self, event_type, event_time, non_pad_mask):
         """ Encode event sequences via masked self-attention. """
