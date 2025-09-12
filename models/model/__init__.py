@@ -9,7 +9,7 @@ from models.model.torch_model.torch_rmtpp import RMTPP as TorchRMTPP
 from models.model.torch_model.torch_sahp import SAHP as TorchSAHP
 from models.model.torch_model.torch_thp import THP as TorchTHP
 from models.model.torch_model.torch_Hawkesthp import HawkesTHP as TorchHawkesTHP
-from models.model.torch_model.torch_Hawkesthp_shared import HawkesTHP_shared as TorchHawkesTHP_shared
+from models.model.torch_model.torch_Hawkesthp_pe import HawkesTHP_pe as TorchHawkesTHP_pe
 
 __all__ = ['TorchBaseModel',
            'TorchNHP',
@@ -22,6 +22,7 @@ __all__ = ['TorchBaseModel',
            'TorchRMTPP',
            'TorchANHN',
            'TorchHawkesTHP',
-          'TorchHawkesTHP_shared']
+           'TorchHawkesTHP_pe'
+           ]
 
 
