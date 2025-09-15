@@ -17,7 +17,7 @@ Install the required dependencies:
 pip install -r requirements.txt
 ```
 ## Datasets
-All datasets should be placed under the `dataset` folder, following the EasyTPP format and preprocessing requirements
+All datasets should be placed under the `dataset` folder, following the EasyTPP format and preprocessing requirements. More details about the data preprocessing could be found in the EasyTPP repo.
 
 ```bash
     data
