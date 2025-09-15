@@ -17,7 +17,10 @@ Install the required dependencies:
 pip install -r requirements.txt
 ```
 ## Datasets
-All datasets should be placed under the `dataset` folder, following the EasyTPP format and preprocessing requirements. More details about the data preprocessing could be found in the EasyTPP repo.
+
+All datasets should be placed under the `dataset` folder, following the EasyTPP format and preprocessing requirements. 
+
+More details about the data preprocessing could be found in the EasyTPP repo.
 
 ```bash
     data
@@ -29,6 +32,7 @@ All datasets should be placed under the `dataset` folder, following the EasyTPP 
 ## Configurations
 
 All training configurations are stored in `.yaml` files under `scripts/train_experiments/`.
+
 Select the dataset config and adjust hyperparameters inside the corresponding YAML file.
 
 ```bash
@@ -40,6 +44,7 @@ scripts/train_experiments/
 ## Running Experiments
 
 Modify the `run.sh` file to set the correct path to the YAML config file and select the model you want to run.
+
 For example, this file runs an experiment of Hawkes Attention on the taxi dataset:
 ```bash
 python -m scripts.train_experiment.run --config_dir scripts/train_experiment/taxi_config.yaml --experiment_id HawkesTHP_train
