@@ -3,79 +3,11 @@ import torch.nn as nn
 import torch.nn.functional as F
 import math
 import numpy as np
-from layers.Transformer_EncDec import Encoder, EncoderLayer, Decoder2, DecoderLayer2
+from layers.Transformer_EncDec import Encoder, EncoderLayer
 from layers.SelfAttention_Family import FullAttention, AttentionLayer
 from layers.Embed import DataEmbedding,DataEmbedding2,DataEmbedding_inverted
 import matplotlib.pyplot as plt
 import seaborn as sns
-
-
-def visualize_attention(attn, title="Attention Heatmap", save_path="attention_heatmap_masked.png"):
-    """
-    Visualize attention scores as a heatmap.
-    
-    Parameters:
-    - attn: torch.Tensor, attention scores (shape: [B, H, L, S])
-    - title: str, title of the heatmap
-    """
-    # Select the first batch and head for visualization
-    attn = attn[0, 0].detach().cpu().numpy()  # Shape: [L, S]
-    
-    # Create the heatmap
-    plt.figure(figsize=(10, 8))
-    sns.heatmap(attn, cmap="viridis", annot=False, fmt=".2f")
-    plt.title(title)
-    plt.xlabel("Keys (S)")
-    plt.ylabel("Queries (L)")
-    plt.savefig(save_path)
-    #print(f"Attention heatmap saved to {save_path}")
-
-def visualize_phiQ_heatmap(phi_Q, batch_idx=0, head_idx=0, save_path="phiQ_heatmap.png"):
-    """
-    phi_Q: torch.Tensor, shape [B, H, Lq, Lk]
-    """
-    # 取指定 batch 和 head
-    phi = phi_Q[batch_idx, head_idx].detach().cpu().numpy()  # shape: [Lq, Lk]
-    plt.figure(figsize=(8, 6))
-    sns.heatmap(phi, cmap="viridis")
-    plt.title(f"phi_Q Heatmap (Batch {batch_idx}, Head {head_idx})")
-    plt.xlabel("Key position (Lk)")
-    plt.ylabel("Query position (Lq)")
-    plt.tight_layout()
-    plt.savefig(save_path)
-    #print(f"phi_Q heatmap saved to {save_path}")
-
-
-#  PATCHING 
-# Useless, just ignore
-class PatchEmbedding(nn.Module):
-    def __init__(self, d_model, patch_len, stride):
-        super(PatchEmbedding, self).__init__()
-        self.patch_len = patch_len
-        self.stride = stride
-
-        self.proj = nn.Conv1d(in_channels=d_model, out_channels=d_model,
-                              kernel_size=patch_len, stride=stride, padding=0)
-
-    def forward(self, x, time):
-        # x: [B, L, d_model]
-        B, L, D = x.shape
-
-        n_patches = math.ceil((L - self.patch_len + 1) / self.stride)
-        pad_len = (n_patches - 1) * self.stride + self.patch_len - L
-        if pad_len > 0:
-            x = F.pad(x, (0, 0, 0, pad_len))
-            time = F.pad(time, (0, 0, 0, pad_len))
-        #[B, d_model, L]
-        x = x.permute(0, 2, 1)
-        # [B, d_model, n_patches]
-        x_patch = self.proj(x)
-        # [B, n_patches, d_model]
-        x_patch = x_patch.transpose(1, 2)
-        #  [B, L, time_dim] -> [B, n_patches, time_dim]
-        patches = time.unfold(1, self.patch_len, self.stride)  # [B, n_patches, time_dim, patch_len]
-        time_patch = patches.mean(-1)
-        return x_patch, time_patch
 
 
 
@@ -150,7 +82,7 @@ class HawkesAttention(nn.Module):
         phiQ = torch.stack([self.phi_Q[h](delta).squeeze(-1) for h in range(self.n_new_heads)], dim=1)
         phiK = torch.stack([self.phi_K[h](delta).squeeze(-1) for h in range(self.n_new_heads)], dim=1)
         phiV = torch.stack([self.phi_V[h](delta).squeeze(-1) for h in range(self.n_new_heads)], dim=1)
-        #visualize_phiQ_heatmap(phiQ,batch_idx=0, head_idx=0, save_path="phiQ_heatmap.png")
+
         #  [B, H, Lq, Lk, head_dim]
         Q_mod = phiQ.unsqueeze(-1) * Q0.unsqueeze(3)
         K_mod = phiK.unsqueeze(-1) * K0.unsqueeze(2)
@@ -173,8 +105,7 @@ class HawkesAttention(nn.Module):
 
 
         attn = F.softmax(scores, dim=-1)
-        # print(attn.shape)
-        #visualize_attention(attn, title="Attention Heatmap_masked")
+
         attn = self.dropout(attn)
 
         # Compute output: [B, H, Lq, head_dim]
@@ -247,7 +178,6 @@ class Model(nn.Module):
         self.label_len = configs.label_len
         self.output_attention = configs.output_attention
         self.use_norm = configs.use_norm
-        self.patch_flag = configs.patch_flag
         self.class_strategy = configs.class_strategy
         self.d_model=configs.d_model
         self.new_d_model=configs.new_d_model
@@ -263,17 +193,8 @@ class Model(nn.Module):
             freq=configs.freq,       
             dropout=configs.dropout  
         )
-
-        if self.patch_flag:
-            self.patch_embed = PatchEmbedding(configs.new_d_model,
-                                              configs.patch_len,
-                                              configs.patch_stride)
-            # cal patch len
-            self.eff_seq_len = math.ceil((self.seq_len
-                                     - configs.patch_len + 1)
-                                     / configs.patch_stride)
-        else:
-            self.eff_seq_len = self.seq_len
+        
+        self.eff_seq_len = self.seq_len
 
         self.invert_embedding = DataEmbedding_inverted(
             self.eff_seq_len,
@@ -283,12 +204,6 @@ class Model(nn.Module):
             self.dropout
         )
 
-        # kernel attention
-        # self.new_layers = nn.ModuleList([
-        #     MLPTimeAttention(configs.d_model,
-        #                         configs.n_new_heads,configs.time_dim, configs.tmlp_width,configs.tmlp_depth,configs.activation,configs.dropout)
-        #     for _ in range(configs.num_new_layers)
-        # ])
 
         self.new_layers=nn.ModuleList([HawkesEncoderLayer(
             attention=HawkesAttention(configs.new_d_model,configs.n_new_heads,configs.time_dim,configs.tmlp_width,configs.tmlp_depth,configs.activation,
@@ -320,27 +235,6 @@ class Model(nn.Module):
             enc_in=configs.enc_in
         )
 
-
-        self.decoder = Decoder2(
-            layers=[
-                DecoderLayer2(
-                    self_attention=HawkesAttention(configs.new_d_model, configs.n_new_heads, configs.time_dim,
-                                                   configs.tmlp_width, configs.tmlp_depth, configs.activation,
-                                                   configs.dropout),
-                    cross_attention=HawkesAttention(configs.new_d_model, configs.n_new_heads, configs.time_dim,
-                                                    configs.tmlp_width, configs.tmlp_depth, configs.activation,
-                                                    configs.dropout),
-                    d_model=configs.new_d_model,
-                    d_ff=configs.d_ff,
-                    dropout=configs.dropout,
-                    activation=configs.activation
-                ) for _ in range(configs.d_layers)
-            ],
-            norm_layer=nn.LayerNorm(configs.new_d_model)
-        )
-
-        self.decoder_projector=nn.Linear(self.new_d_model, configs.enc_in)
-
         self.time_proj = nn.Linear(configs.time_dim, configs.new_d_model)
 
 
@@ -349,63 +243,28 @@ class Model(nn.Module):
         if self.use_norm:
             means = x_enc.mean(1, keepdim=True).detach()
             x_enc = x_enc - means
-            #x_dec = x_dec - means
+
             stdev = torch.sqrt(torch.var(x_enc, dim=1, keepdim=True, unbiased=False) + 1e-5)
             x_enc = x_enc / stdev
-            #x_dec = x_dec / stdev
+
 
         _, _, N = x_enc.shape
-        # embeddingtm
+
         enc_out = self.enc_embedding(x_enc, None)
         x_dec = self.enc_embedding(x_dec, None)
         x_dec_tokens = self.time_proj(x_mark_dec)
-        #enc_out=x_enc
-        # patch
-        if self.patch_flag:
-            #print("patching")
-            enc_out, x_mark_enc = self.patch_embed(enc_out, x_mark_enc)
-        # kernel attention
-        # print("enc_out shape:", enc_out.shape)
-        # print("x_mark_enc shape:", x_mark_enc.shape)
+            
         for layer in self.new_layers:
             enc_out = layer(enc_out, enc_out, enc_out, x_mark_enc,x_mark_enc, hawkes_self_attn_mask=True)
         enc_out = self.new_layers_norm(enc_out)
-        # inverted
-        #enc_out=self.invert_embedding(enc_out,x_mark_enc)
-        # # encoder
-        #enc_out, attns = self.encoder(enc_out, attn_mask=None)
-
-        # projection & permute
-
-        #dec_out = self.projector(enc_out).permute(0, 2, 1)[:, :, :N]
 
         dec_out = self.new_projector(enc_out)
-
-        # decoder
-        # dec_out = self.decoder(
-        #     x=x_dec_tokens,  # Ground truth for self-attention
-        #     cross=enc_out,  # Cross-attention input from encoder
-        #     t_x=x_mark_dec,  # Time features for self-attention
-        #     t_cross=x_mark_enc,  # Time features for cross-attention
-        #     x_mask=True,
-        #     cross_mask=False  
-        # )
-        # dec_out = self.decoder_projector(dec_out)
-        # dec_out =dec_out[:, -self.pred_len:, :] 
-
 
         # denormalization
         if self.use_norm:
             dec_out = dec_out * stdev[:, 0, :].unsqueeze(1).repeat(1, self.pred_len, 1)
             dec_out = dec_out + means[:, 0, :].unsqueeze(1).repeat(1, self.pred_len, 1)
         return dec_out
-
-    # def forward(self, x_enc, x_mark_enc, x_dec, x_mark_dec, mask=None):
-    #     dec_out= self.forecast(x_enc, x_mark_enc, x_dec, x_mark_dec)
-    #     if self.output_attention:
-    #         return dec_out[:, -self.pred_len:, :]   
-    #     else:
-    #         return dec_out[:, -self.pred_len:, :]
 
     def forward(self, x_enc, x_mark_enc, x_dec, x_mark_dec):
         if self.channel_independence:
@@ -417,7 +276,7 @@ class Model(nn.Module):
                 out_i = self.forecast(x_enc_i, x_mark_enc, x_dec_i, x_mark_dec)
                 outs.append(out_i)
             out=torch.cat(outs, dim=-1)
-            #print("out shape:", out.shape)
+
             return out
         else:
             return self.forecast(x_enc, x_mark_enc, x_dec, x_mark_dec)
