@@ -8,20 +8,7 @@ class Exp_Basic(object):
     def __init__(self, args):
         self.args = args
         self.model_dict = {
-            'Transformer': Transformer,
-            'Informer': Informer,
-            'Reformer': Reformer,
-            'Flowformer': Flowformer,
-            'Flashformer': Flashformer,
-            'iTransformer': iTransformer,
-            'iInformer': iInformer,
-            'iReformer': iReformer,
-            'iFlowformer': iFlowformer,
-            'iFlashformer': iFlashformer,
             'hawkes': hawkes,
-            'hawkesauto': hawkesauto,
-            'hawkesauto2':hawkesauto2,
-            'hawkes_tproj':hawkes_tproj,
         }
         self.device = self._acquire_device()
         self.model = self._build_model().to(self.device)
