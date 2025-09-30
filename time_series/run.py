@@ -40,9 +40,9 @@ if __name__ == '__main__':
     parser.add_argument('--dec_in', type=int, default=7, help='decoder input size')
     parser.add_argument('--c_out', type=int, default=7, help='output size') # applicable on arbitrary number of variates in inverted Transformers
     parser.add_argument('--d_model', type=int, default=512, help='dimension of model')
+# These lines of code are adding command-line arguments to the parser for the number of attention
+# heads (`n_heads`) and the number of encoder layers (`e_layers`) in the model configuration.
     parser.add_argument('--n_heads', type=int, default=8, help='num of heads')
-    parser.add_argument('--e_layers', type=int, default=2, help='num of encoder layers')
-    parser.add_argument('--d_layers', type=int, default=1, help='num of decoder layers')
     parser.add_argument('--d_ff', type=int, default=2048, help='dimension of fcn')
     parser.add_argument('--moving_avg', type=int, default=25, help='window size of moving average')
     parser.add_argument('--factor', type=int, default=1, help='attn factor')
@@ -86,10 +86,7 @@ if __name__ == '__main__':
     parser.add_argument('--use_norm', type=int, default=True, help='use norm and denorm')
     parser.add_argument('--partial_start_index', type=int, default=0, help='the start index of variates for partial training')
 
-    parser.add_argument('--new_d_model', type=int, default=16,help='dimension of each original token')
-    parser.add_argument('--n_new_heads', type=int, default=4, help='number of new attention heads')
-    parser.add_argument('--num_kernels', type=int, default=20, help='number of learnable gaussian kernels')
-    parser.add_argument('--num_new_layers', type=int, default=2, help='number of stacked new attention layers')
+    parser.add_argument('--num_layers', type=int, default=2, help='number of stacked new attention layers')
 
     parser.add_argument('--time_dim', type=int, default=None,help='time embedding dimension, e.g. freq_map[freq] or from datafactory')
     parser.add_argument('--tmlp_width', type=int, default=256,help='time mlp width')
@@ -120,7 +117,7 @@ if __name__ == '__main__':
     if args.is_training:
         for ii in range(args.itr):
             # setting record of experiments
-            setting = '{}_{}_{}_ft{}_sl{}_ll{}_pl{}_dm{}_nh{}_el{}_dl{}_df{}_fc{}_eb{}_dt{}_{}_{}_newd{}_nh{}_kn{}_nl{}_tmlpw{}_tmlpd{}_{}'.format(
+            setting = '{}_{}_{}_ft{}_sl{}_ll{}_pl{}_dm{}_nh{}_df{}_fc{}_eb{}_dt{}_{}_{}_nl{}_tmlpw{}_tmlpd{}_{}'.format(
                 args.model_id,
                 args.model,
                 args.data,
@@ -130,19 +127,13 @@ if __name__ == '__main__':
                 args.pred_len,
                 args.d_model,
                 args.n_heads,
-                args.e_layers,
-                args.d_layers,
                 args.d_ff,
                 args.factor,
                 args.embed,
                 args.distil,
                 args.des,
                 args.class_strategy,
-
-                args.new_d_model,
-                args.n_new_heads,
-                args.num_kernels,
-                args.num_new_layers,
+                args.num_layers,
                 args.tmlp_width,
                 args.tmlp_depth,
                 ii)
@@ -161,7 +152,7 @@ if __name__ == '__main__':
             torch.cuda.empty_cache()
     else:
         ii = 0
-        setting = '{}_{}_{}_ft{}_sl{}_ll{}_pl{}_dm{}_nh{}_el{}_dl{}_df{}_fc{}_eb{}_dt{}_{}_{}_newd{}_nh{}_kn{}_nl{}_tmlpw{}_tmlpd{}_{}'.format(
+        setting = '{}_{}_{}_ft{}_sl{}_ll{}_pl{}_dm{}_nh{}_df{}_fc{}_eb{}_dt{}_{}_{}_nl{}_tmlpw{}_tmlpd{}_{}'.format(
                 args.model_id,
                 args.model,
                 args.data,
@@ -171,18 +162,13 @@ if __name__ == '__main__':
                 args.pred_len,
                 args.d_model,
                 args.n_heads,
-                args.e_layers,
-                args.d_layers,
                 args.d_ff,
                 args.factor,
                 args.embed,
                 args.distil,
                 args.des,
                 args.class_strategy,
-                args.new_d_model,
-                args.n_new_heads,
-                args.num_kernels,
-                args.num_new_layers,
+                args.num_layers,
                 args.tmlp_width,
                 args.tmlp_depth,
                 ii)
