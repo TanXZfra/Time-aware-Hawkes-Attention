@@ -1,7 +1,6 @@
 import os
 import torch
-from model import Transformer, Informer, Reformer, Flowformer, Flashformer, \
-    iTransformer, iInformer, iReformer, iFlowformer, iFlashformer,hawkes, hawkesauto, hawkesauto2, hawkes_tproj
+from model import hawkes
 
 
 class Exp_Basic(object):
