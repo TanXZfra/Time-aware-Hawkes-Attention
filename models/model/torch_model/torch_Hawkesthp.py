@@ -2,9 +2,12 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import math
-from models.model.torch_model.torch_baselayer import  MultiHeadAttention, HawkesAttention4, TimePositionalEncoding, ScaledSoftplus
+from models.model.torch_model.torch_baselayer import  MultiHeadAttention, HawkesAttention, TimePositionalEncoding, ScaledSoftplus
 from models.model.torch_model.torch_basemodel import TorchBaseModel
 
+"""
+This is the complete model of Hawkes Attention on MTPPs.
+"""
 
 class HawkesTHP(TorchBaseModel):
 
@@ -232,7 +235,7 @@ class EncoderLayer(nn.Module):
     def __init__(self,opt, d_model, d_inner, n_head, d_k, d_v,num_types,phi_width,phi_depth, dropout=0.1, normalize_before=True):
         super(EncoderLayer, self).__init__()
 
-        self.self_attn = HawkesAttention4(
+        self.self_attn = HawkesAttention(
             num_types= num_types,
             n_head= n_head,
             d_model= d_model,
