@@ -82,9 +82,7 @@ class MultiHeadAttention(nn.Module):
             else:
                 return x
             
-
-##first choice
-class HawkesAttention4(nn.Module):
+class HawkesAttention(nn.Module):
     """
     Inputs:
       q:    (B, L, d_model) query embeddings (event embeddings projected)
