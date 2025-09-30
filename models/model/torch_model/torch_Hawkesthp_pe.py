@@ -2,9 +2,11 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import math
-from models.model.torch_model.torch_baselayer import  MultiHeadAttention, HawkesAttention4, TimePositionalEncoding, ScaledSoftplus
+from models.model.torch_model.torch_baselayer import  MultiHeadAttention, HawkesAttention, TimePositionalEncoding, ScaledSoftplus
 from models.model.torch_model.torch_basemodel import TorchBaseModel
-
+"""
+This is the variant with positional encodings added to the original model.
+"""
 
 class HawkesTHP_pe(TorchBaseModel):
 
@@ -43,7 +45,7 @@ class HawkesTHP_pe(TorchBaseModel):
         self.layer_intensity_hidden = nn.Linear(self.d_model, self.num_event_types)
         self.softplus = ScaledSoftplus(self.num_event_types)   # learnable mark-specific beta
 
-        self.encoder = Encoder2(
+        self.encoder = Encoder(
             model_config,
             num_types=self.num_event_types,
             d_model=self.d_model,
@@ -232,7 +234,7 @@ class EncoderLayer(nn.Module):
     def __init__(self,opt, d_model, d_inner, n_head, d_k, d_v,num_types,phi_width,phi_depth, dropout=0.1, normalize_before=True):
         super(EncoderLayer, self).__init__()
 
-        self.self_attn = HawkesAttention4(
+        self.self_attn = HawkesAttention(
             num_types= num_types,
             n_head= n_head,
             d_model= d_model,
@@ -294,7 +296,7 @@ class PositionwiseFeedForward(nn.Module):
             x = self.layer_norm(x)
         return x
     
-class Encoder2(nn.Module):
+class Encoder(nn.Module):
     """ A encoder model with self attention mechanism. """
 
     def __init__(
@@ -363,4 +365,5 @@ class RNN_layers(nn.Module):
         out = nn.utils.rnn.pad_packed_sequence(temp, batch_first=True)[0]
 
         out = self.projection(out)
+
         return out
