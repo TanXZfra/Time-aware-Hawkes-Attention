@@ -180,7 +180,7 @@ class Model(nn.Module):
         self.use_norm = configs.use_norm
         self.class_strategy = configs.class_strategy
         self.d_model=configs.d_model
-        self.new_d_model=configs.new_d_model
+        self.new_d_model=configs.d_model
         self.embed=configs.embed
         self.freq=configs.freq
         self.dropout=configs.dropout
@@ -188,7 +188,7 @@ class Model(nn.Module):
 
         self.enc_embedding = DataEmbedding2(
             configs.enc_in,          
-            configs.new_d_model,           
+            configs.d_model,           
             embed_type=configs.embed,  
             freq=configs.freq,       
             dropout=configs.dropout  
@@ -196,37 +196,15 @@ class Model(nn.Module):
         
         self.eff_seq_len = self.seq_len
 
-        self.invert_embedding = DataEmbedding_inverted(
-            self.eff_seq_len,
-            self.d_model,
-            self.embed,
-            self.freq,
-            self.dropout
-        )
-
 
         self.new_layers=nn.ModuleList([HawkesEncoderLayer(
-            attention=HawkesAttention(configs.new_d_model,configs.n_new_heads,configs.time_dim,configs.tmlp_width,configs.tmlp_depth,configs.activation,
+            attention=HawkesAttention(configs.d_model,configs.n_heads,configs.time_dim,configs.tmlp_width,configs.tmlp_depth,configs.activation,
                                        configs.dropout
-            ),new_d_model=configs.new_d_model,d_ff=configs.d_ff,dropout=configs.dropout,activation=configs.activation)
-            for _ in range(configs.num_new_layers)])
+            ),new_d_model=configs.d_model,d_ff=configs.d_ff,dropout=configs.dropout,activation=configs.activation)
+            for _ in range(configs.num_layers)])
         
-        self.new_layers_norm= nn.LayerNorm(configs.new_d_model)
-        # encoder
-        self.encoder = Encoder([
-            EncoderLayer(
-                AttentionLayer(
-                    FullAttention(False, configs.factor, attention_dropout=configs.dropout,
-                                  output_attention=configs.output_attention),
-                    configs.d_model, configs.n_heads),
-                configs.d_model, configs.d_ff,
-                dropout=configs.dropout,
-                activation=configs.activation
-            ) for _ in range(configs.e_layers)
-        ], norm_layer=torch.nn.LayerNorm(configs.d_model))
+        self.new_layers_norm= nn.LayerNorm(configs.d_model)
 
-
-        self.projector = nn.Linear(configs.d_model, configs.pred_len)
         
         self.new_projector = Projector(
             seq_len=self.eff_seq_len,
@@ -235,7 +213,7 @@ class Model(nn.Module):
             enc_in=configs.enc_in
         )
 
-        self.time_proj = nn.Linear(configs.time_dim, configs.new_d_model)
+        self.time_proj = nn.Linear(configs.time_dim, configs.d_model)
 
 
 
