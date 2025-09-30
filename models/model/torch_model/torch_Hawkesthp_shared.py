@@ -2,9 +2,11 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import math
-from models.model.torch_model.torch_baselayer import  MultiHeadAttention, HawkesAttention4, HawkesAttentionShared, TimePositionalEncoding, ScaledSoftplus, EncoderLayer
+from models.model.torch_model.torch_baselayer import  MultiHeadAttention, HawkesAttention, HawkesAttentionShared, TimePositionalEncoding, ScaledSoftplus, EncoderLayer
 from models.model.torch_model.torch_basemodel import TorchBaseModel
-
+"""
+This is the variant using a shared learnable kernel across all classes of events.
+"""
 
 class HawkesTHP_shared(TorchBaseModel):
 
@@ -42,41 +44,6 @@ class HawkesTHP_shared(TorchBaseModel):
         # convert hidden vectors into event-type-sized vector
         self.layer_intensity_hidden = nn.Linear(self.d_model, self.num_event_types)
         self.softplus = ScaledSoftplus(self.num_event_types)   # learnable mark-specific beta
-
-        # # Add MLP layer
-        # # Equation (5)
-        # self.feed_forward = nn.Sequential(
-        #     nn.Linear(self.d_model, self.d_model * 2),
-        #     nn.ReLU(),
-        #     nn.Linear(self.d_model * 2, self.d_model)
-        # )
-
-        # self.stack_layers = nn.ModuleList(
-        #     [EncoderLayer(
-        #         self.d_model,
-        #         MultiHeadAttention(self.n_head, self.d_model, self.d_model, self.dropout,
-        #                            output_linear=False),
-        #         use_residual=False,
-        #         feed_forward=self.feed_forward,
-        #         dropout=self.dropout
-        #     ) for _ in range(self.n_layers)])
-
-
-        # self.stack_layers = nn.ModuleList(
-        #     [EncoderLayer(
-        #         self.d_model,
-        #         HawkesAttention4(self.num_event_types, self.n_head, self.d_model, self.d_k, self.d_v,
-        #                          self.phi_width, self.phi_depth, self.dropout),
-        #         use_residual=False,
-        #         feed_forward=self.feed_forward,
-        #         dropout=self.dropout
-        #     ) for _ in range(self.n_layers)])
-
-
-        # self.stack_layers = nn.ModuleList([
-        #     EncoderLayer(model_config,self.d_model, d_inner, n_head, d_k, d_v,num_types,phi_width,phi_depth, 
-        #                  dropout=dropout, normalize_before=False,original_THP=original_THP)
-        #     for _ in range(self.n_layers)])
 
         self.encoder = Encoder(
             model_config,
