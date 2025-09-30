@@ -86,10 +86,6 @@ if __name__ == '__main__':
     parser.add_argument('--use_norm', type=int, default=True, help='use norm and denorm')
     parser.add_argument('--partial_start_index', type=int, default=0, help='the start index of variates for partial training')
 
-    # --- new TimeKernel params (placed at end) ---
-    parser.add_argument('--patch_flag', type=int, default=0, help='whether to use patching')
-    parser.add_argument('--patch_len', type=int, default=16, help='patch length for conv')
-    parser.add_argument('--patch_stride', type=int, default=8, help='stride for patch conv')
     parser.add_argument('--new_d_model', type=int, default=16,help='dimension of each original token')
     parser.add_argument('--n_new_heads', type=int, default=4, help='number of new attention heads')
     parser.add_argument('--num_kernels', type=int, default=20, help='number of learnable gaussian kernels')
@@ -114,7 +110,7 @@ if __name__ == '__main__':
 
     print('Args in experiment:')
     print(args)
-    # print(args.patch_flag)
+  
 
     if args.exp_name == 'partial_train': # See Figure 8 of our paper, for the detail
         Exp = Exp_Long_Term_Forecast_Partial
@@ -124,7 +120,7 @@ if __name__ == '__main__':
     if args.is_training:
         for ii in range(args.itr):
             # setting record of experiments
-            setting = '{}_{}_{}_ft{}_sl{}_ll{}_pl{}_dm{}_nh{}_el{}_dl{}_df{}_fc{}_eb{}_dt{}_{}_{}_pflag{}_pl{}_ps{}_newd{}_nh{}_kn{}_nl{}_tmlpw{}_tmlpd{}_{}'.format(
+            setting = '{}_{}_{}_ft{}_sl{}_ll{}_pl{}_dm{}_nh{}_el{}_dl{}_df{}_fc{}_eb{}_dt{}_{}_{}_newd{}_nh{}_kn{}_nl{}_tmlpw{}_tmlpd{}_{}'.format(
                 args.model_id,
                 args.model,
                 args.data,
@@ -142,9 +138,7 @@ if __name__ == '__main__':
                 args.distil,
                 args.des,
                 args.class_strategy,
-                args.patch_flag,
-                args.patch_len,
-                args.patch_stride,
+
                 args.new_d_model,
                 args.n_new_heads,
                 args.num_kernels,
@@ -167,7 +161,7 @@ if __name__ == '__main__':
             torch.cuda.empty_cache()
     else:
         ii = 0
-        setting = '{}_{}_{}_ft{}_sl{}_ll{}_pl{}_dm{}_nh{}_el{}_dl{}_df{}_fc{}_eb{}_dt{}_{}_{}_pflag{}_pl{}_ps{}_newd{}_nh{}_kn{}_nl{}_tmlpw{}_tmlpd{}_{}'.format(
+        setting = '{}_{}_{}_ft{}_sl{}_ll{}_pl{}_dm{}_nh{}_el{}_dl{}_df{}_fc{}_eb{}_dt{}_{}_{}_newd{}_nh{}_kn{}_nl{}_tmlpw{}_tmlpd{}_{}'.format(
                 args.model_id,
                 args.model,
                 args.data,
@@ -185,9 +179,6 @@ if __name__ == '__main__':
                 args.distil,
                 args.des,
                 args.class_strategy,
-                args.patch_flag,
-                args.patch_len,
-                args.patch_stride,
                 args.new_d_model,
                 args.n_new_heads,
                 args.num_kernels,
